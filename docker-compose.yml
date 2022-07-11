@@ -1,0 +1,101 @@
+version: '3.4'
+services:
+  zipkin-service:
+    image: openzipkin/zipkin:2
+    container_name: zipkin-service
+    ports:
+      - 9411:9411
+
+  rabbitmq-service:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-service
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  mongodb:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - 27017:27017
+
+  mongodbcatalog:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - 27018:27017
+
+  mysqldb:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: movies
+    ports:
+      - "3307:3306"
+
+  eureka-service:
+    build:
+      context: eureka
+    container_name: eureka-service
+    depends_on:
+      - zipkin-service
+    ports:
+      - 8761:8761
+
+  config-server:
+    build: configServer
+    container_name: config-server
+    depends_on:
+      - eureka-service
+    ports:
+      - 8888:8888
+
+  movie-service:
+    build: movie
+    container_name: movie-service
+    depends_on:
+      - eureka-service
+      - config-server
+    ports:
+      - 8082:8082
+
+  serie-service:
+    build: serie
+    container_name: serie-service
+    depends_on:
+      - eureka-service
+      - config-server
+      - mongodb
+    ports:
+      - 8083:8083
+
+  catalog-service:
+    build: catalog
+    container_name: catalog-service
+    depends_on:
+      - eureka-service
+      - config-server
+      - movie-service
+      - serie-service
+      - mongodbcatalog
+    ports:
+      - 8081:8081
+
+  api-gateway:
+    build: gateway
+    container_name: api-gateway
+    depends_on:
+      - eureka-service
+      - config-server
+      - movie-service
+      - serie-service
+      - catalog-service
+    ports:
+      - 8080:8080

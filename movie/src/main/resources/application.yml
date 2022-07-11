@@ -1,0 +1,49 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /movies/
+
+spring:
+  application:
+    name: movie-service
+  zipkin:
+    base-url: http://zipkin-service:9411/
+  config:
+    import: optional:configserver:http://CONFIG-SERVER:8888
+  cloud:
+    config:
+      profile: dev
+  rabbitmq:
+    username: guest
+    password: guest
+    host: rabbitmq-service
+    port: 5672
+queue:
+  movie:
+    name: MovieQueue
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://MYSQLDB:3306/movies?useTimezone=true&serverTimezone=UTC&createDatabaseIfNotExist=true
+    username: root
+    password: root
+
+  jpa:
+    hibernate.dialect: org.hibernate.dialect.MySQL5Dialect
+    hibernate.ddl-auto: update
+    hibernate:
+      jdbc: time_zone = TimeZone
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://eureka-service:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

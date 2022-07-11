@@ -1,0 +1,45 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /catalog/
+
+spring:
+  application:
+    name: catalog-service
+  zipkin:
+    base-url: http://zipkin-service:9411/
+  config:
+    import: optional:configserver:http://CONFIG-SERVER:8888
+  cloud:
+    config:
+      profile: dev
+  rabbitmq:
+    username: guest
+    password: guest
+    host: rabbitmq-service
+    port: 5672
+queue:
+  serie:
+    name: SerieQueue
+  movie:
+    name: MovieQueue
+  data:
+    mongodb:
+      user: root
+      password: example
+      uri: mongodb://mongodbcatalog:27018/catalog
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://eureka-service:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

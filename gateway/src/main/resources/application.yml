@@ -1,0 +1,60 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  zipkin:
+    base-url: http://zipkin-service:9411/
+  config:
+    import: optional:configserver:http://CONFIG-SERVER:8888
+  cloud:
+    config:
+      profile: dev
+  gateway:
+    discovery:
+      locator:
+        enabled: true
+        lower-case-service-id: true
+    routes:
+      - id: catalogRoute
+        uri: lb://CATALOG-SERVICE
+        predicates:
+          - Path=/catalog/**
+        filters:
+          - name: CircuitBreaker
+            args:
+              name: catalogService
+              fallbackUri: forward:/fallback/catalog
+      - id: movieRoute
+        uri: lb://MOVIE-SERVICE
+        predicates:
+          - Path=/movie/**
+#        filters:
+#          - TokenRelay
+
+      - id: serieRoute
+        uri: lb://SERIE-SERVICE
+        predicates:
+          - Path=/serie/**
+#        filters:
+#          - TokenRelay
+
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id: 575907632880-bvi9qc76dmpssmqu5lt5r3g7qaqtta2j.apps.googleusercontent.com
+#            client-secret: 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
+#            scope: openid
+#            redirect-uri: http:// ${API-GATEWAY:localhost}:8080/login/oauth2/code/google
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://eureka-service:8761/eureka/
